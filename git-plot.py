@@ -6,8 +6,9 @@ import internal
 import internal.log
 
 def main():
-	print "===> Starting Git Plot"
-	_op = OptionParser()
+	sub_commands = ['leaderboard', 'timeofday']
+	usage = 'usage: %%prog [options] <%s>' % '|'.join(sub_commands)
+	_op = OptionParser(usage=usage)
 	_op.add_option('-d', '--directory', default='.', dest='directory', help='Directory of the Git repository to analyze')
 	_op.add_option('--dry-run', action='store_true', dest='dryrun', help='Don\'t actually generate graphs, just print data')
 	_op.add_option('-c', '--chart', default='bar', dest='chart', help='Type of chart you\'d like (where applicable), (pie, donut, bar)')
@@ -15,6 +16,10 @@ def main():
 	_op.add_option('--after', default=None, dest='after', help='Speficy an "after" time frame')
 
 	options, args = _op.parse_args()
+
+	if not args or not args[0] in sub_commands:
+		print 'You must specify one of the subcommands! (%s)' % ', '.join(sub_commands)
+		return
 	
 	chart = internal.ChartType.Bar
 	if options.chart == 'pie':
@@ -27,8 +32,8 @@ def main():
 	if options.directory:
 		glog.directory = options.directory
 	glog.load()
-	glog.top_committers(chart=chart)
 
+	return getattr(glog, args[0])(chart=chart)
 
 if __name__ == '__main__':
 	main()

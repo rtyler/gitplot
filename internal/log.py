@@ -1,4 +1,5 @@
 import copy
+import itertools
 import os
 import sys
 import time
@@ -25,7 +26,7 @@ class GitLog(object):
 	default_directory = directory
 	should_graph = True
 	# OH GOD IT BURNS
-	__log_format = '''{%(q)scommitter_name%(q)s : %(q)s%%cn%(q)s, %(q)scommitter_email%(q)s : %(q)s%%ce%(q)s, %(q)shash%(q)s : %(q)s%%H%(q)s,	%(q)sabbrev_hash%(q)s : %(q)s%%h%(q)s, %(q)scommitter_date%(q)s : %(q)s%%ct%(q)s, %(q)sencoding%(q)s : %(q)s%%e%(q)s, %(q)ssubject%(q)s : %(q)s%%s%(q)s, %(q)sbody%(q)s : %(q)s%%b%(q)s, %(q)stree_hash%(q)s : %(q)s%%T%(q)s, %(q)sauthor_name%(q)s : %(q)s%%an%(q)s, %(q)sauthor_email%(q)s : %(q)s%%ae%(q)s, %(q)sauthor_date%(q)s : %(q)s%%at%(q)s}%(eol)s''' % {'q' : internal.DQUOTE, 'eol' : internal.EOL}
+	__log_format = '''{%(q)scommitter_name%(q)s : %(q)s%%cn%(q)s, %(q)scommitter_email%(q)s : %(q)s%%ce%(q)s, %(q)shash%(q)s : %(q)s%%H%(q)s,	%(q)sabbrev_hash%(q)s : %(q)s%%h%(q)s, %(q)scommitter_date%(q)s : %%ct, %(q)sencoding%(q)s : %(q)s%%e%(q)s, %(q)ssubject%(q)s : %(q)s%%s%(q)s, %(q)sbody%(q)s : %(q)s%%b%(q)s, %(q)stree_hash%(q)s : %(q)s%%T%(q)s, %(q)sauthor_name%(q)s : %(q)s%%an%(q)s, %(q)sauthor_email%(q)s : %(q)s%%ae%(q)s, %(q)sauthor_date%(q)s : %%at}%(eol)s''' % {'q' : internal.DQUOTE, 'eol' : internal.EOL}
 
 
 	def __init__(self, *args, **kwargs):
@@ -53,10 +54,15 @@ class GitLog(object):
 	def load(self):
 		self.results = self._load_full()
 		self.results = map(lambda r: r and json_decode(r), self.results)
-		self.results = [f for f in self.results if f and not f.update({'committer_handle' : f['committer_email'].split('@')[0]})]
+		def timeofday(f):
+			return time.strftime('%H:%M', time.gmtime(f['committer_date']))
+		def handle(f):
+			return f['committer_email'].split('@')[0]
+		self.results = [f for f in self.results if f and \
+			not f.update({'committer_handle' : handle(f), 'committer_timeofday' : timeofday(f)})]
 		self.results.sort(key=lambda d: d['author_date'])
 	
-	def top_committers(self, count=10, filename=None, by_email=True, chart=internal.ChartType.Bar):
+	def leaderboard(self, count=10, filename=None, by_email=True, chart=internal.ChartType.Bar):
 		if not self.results:
 			self.load()
 		counter = {}
@@ -94,6 +100,38 @@ class GitLog(object):
 
 		try:
 			return locals()['_gen_%s' % chart](top)
+		except KeyError:
+			print 'This function does not support chart type: %s' % chart
+
+	def timeofday(self, filename=None, by_email=True, chart=internal.ChartType.Bar):
+		if not self.results:
+			self.load()
+		results = copy.deepcopy(self.results)
+		results.sort(key=lambda d: d['committer_timeofday'])
+		filename = filename or 'timesofday_%s' % (time.time())
+
+		def _gen_Bar(r):
+			data = {}
+			labels = []
+			bars = []
+			for k,g in itertools.groupby(r, lambda t: (t['committer_timeofday'].split(':')[0], t)):
+				hour = k[0]
+				if not data.get(hour):
+					data[hour] = 0
+				data[hour] += 1
+			data = [(k,v) for k,v in data.iteritems()]
+			data.sort(key=lambda d: d[0])
+			height = 0
+			for k,v in data:
+				if v > height:
+					height = v
+				bars.append(v)
+				labels.append(k)
+			vlabels = ['0', str(height)]
+			CairoPlot.bar_plot(filename, bars, 600, 200, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+
+		try:
+			return locals()['_gen_%s' % chart](results)
 		except KeyError:
 			print 'This function does not support chart type: %s' % chart
 
