@@ -85,18 +85,18 @@ class GitLog(object):
 			print '===> No data to graph!'
 			return
 
-		filename = filename or 'top_%d_committers_%s' % (count, time.time())
+		filename = filename or 'top_%d_committers_%s.png' % (count, time.time())
 		def _gen_Bar(t):
 			data = [c[1] for c in t]
 			labels = [c[0] for c in t]
 			vlabels = ['0', str(data[0])]
-			CairoPlot.bar_plot(filename, data, 600, 200, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+			CairoPlot.bar_plot(filename, data, 700, 400, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
 		def _gen_Donut(t):
 			data = dict([(t[i][0], t[i][1]) for i in xrange(len(t))])
-			CairoPlot.donut_plot(filename, data, 600, 400, gradient=True, shadow=True)
+			CairoPlot.donut_plot(filename, data, 700, 400, gradient=True, shadow=True)
 		def _gen_Pie(t):
 			data = dict([(t[i][0], t[i][1]) for i in xrange(len(t))])
-			CairoPlot.pie_plot(filename, data, 600, 400, gradient=True)
+			CairoPlot.pie_plot(filename, data, 700, 400, gradient=True)
 
 		try:
 			return locals()['_gen_%s' % chart](top)
@@ -108,7 +108,7 @@ class GitLog(object):
 			self.load()
 		results = copy.deepcopy(self.results)
 		results.sort(key=lambda d: d['committer_timeofday'])
-		filename = filename or 'timesofday_%s' % (time.time())
+		filename = filename or 'timesofday_%s.png' % (time.time())
 
 		def _gen_Bar(r):
 			data = {}

@@ -33,7 +33,7 @@ def main():
 		glog.directory = options.directory
 	glog.load()
 
-	return getattr(glog, args[0])(chart=chart)
+	map(lambda x: getattr(glog, x)(chart=chart), args)
 
 if __name__ == '__main__':
 	main()
