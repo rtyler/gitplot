@@ -1,0 +1,19 @@
+  ____    _____      _      ____    __  __   _____ 
+ |  _ \  | ____|    / \    |  _ \  |  \/  | | ____|
+ | |_) | |  _|     / _ \   | | | | | |\/| | |  _|  
+ |  _ <  | |___   / ___ \  | |_| | | |  | | | |___ 
+ |_| \_\ |_____| /_/   \_\ |____/  |_|  |_| |_____|
+===================================================
+
+ABOUT
+-----------------
+git-plot is a tool intended on helping visualize activity being performed inside a 
+particular Git repository.
+
+Currently the project is not "released" insofar that it's really far more experimental
+than anything else right now.
+
+
+REQUIREMENTS
+-----------------
+git-plot depends on Python, Cairo and PyCairo being installed; and naturally Git 

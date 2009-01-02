@@ -1,0 +1,20 @@
+  _   _    ___    _____   _____   ____  
+ | \ | |  / _ \  |_   _| | ____| / ___| 
+ |  \| | | | | |   | |   |  _|   \___ \ 
+ | |\  | | |_| |   | |   | |___   ___) |
+ |_| \_|  \___/    |_|   |_____| |____/ 
+=========================================
+
+Things I want to add:
+	* Pre-generated sets of reports ready for cron
+		- Manager's Report
+			+ Run every week
+			+ Contains data from last 30 days
+			+ Set of authors, or default to "everybody"
+			+ Reports: 
+				> Leaderboard
+				> Time of Day
+				> Commits/Churn ratio per-developer (not developed yet)
+				> Active modules, i.e. sub-directories (not developed yet)
+				> New files per-developer (not developed yet)
+
