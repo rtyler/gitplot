@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 from contrib import CairoPlot
+from internal import log
 
 
 def main():
 	print "===> Starting Git Plot"
+	print log.GitLog.committers()
+	
 
 
 if __name__ == '__main__':
