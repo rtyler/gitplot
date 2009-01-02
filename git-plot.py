@@ -13,7 +13,8 @@ def main():
 	_op.add_option('--dry-run', action='store_true', dest='dryrun', help='Don\'t actually generate graphs, just print data')
 	_op.add_option('-c', '--chart', default='bar', dest='chart', help='Type of chart you\'d like (where applicable), (pie, donut, bar)')
 	_op.add_option('--before', default=None, dest='before', help='Specify a "before" time frame')
-	_op.add_option('--after', default=None, dest='after', help='Speficy an "after" time frame')
+	_op.add_option('--after', default=None, dest='after', help='Specify an "after" time frame')
+	_op.add_option('--author', default=None, dest='author', help='Specify the author to generate the statistics for')
 	_op.add_option('-y', '--height', default=450, dest='height', help='Height of generated images')
 	_op.add_option('-x', '--width', default=800, dest='width', help='Width of generated images')
 
@@ -29,7 +30,7 @@ def main():
 	if options.chart == 'donut':
 		chart = internal.ChartType.Donut
 
-	kwargs = {'before' : options.before, 'after' : options.after, 'dryrun' : options.dryrun}
+	kwargs = {'before' : options.before, 'after' : options.after, 'dryrun' : options.dryrun, 'author' : options.author}
 	glog = internal.log.GitLog(**kwargs)
 	if options.directory:
 		glog.directory = options.directory
