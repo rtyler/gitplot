@@ -17,6 +17,7 @@ def main():
 	if options.directory:
 		glog.directory = options.directory
 	glog.load()
+	glog.top_committers()
 
 
 if __name__ == '__main__':
