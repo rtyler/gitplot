@@ -6,30 +6,36 @@ import internal
 
 from contrib import CairoPlot
 
+def json_decode(s):
+	try:
+		import cjson
+		return cjson.decode(s)
+	except ImportError:
+		import simplejson
+		return simplejson.loads(s)
+
 class GitLog(object):
 	directory = '.'
+	default_directory = directory
 	should_graph = True
-	@classmethod
-	def committers(cls):
-		log_format = '%cn||%ce||%H||%h||%ct'
+	__log_format = '''{"committer_name" : "%cn", "committer_email" : "%ce", "hash" : "%H",	"abbrev_hash" : "%h", "committer_date" : "%ct", "encoding" : "%e"}'''
+
+	def _get_log_fmt(self):
+		return self.__log_format
+	log_format = property(fget=_get_log_fmt)
+
+	def _load_full(self):
 		cwd = os.getcwd()
-		if not cls.directory == '.':
-			os.chdir(cls.directory)
-			
-		results = internal.execute('log', pretty='format:"%s"' % (log_format)) 
+		if not self.directory == self.default_directory:
+			os.chdir(self.directory)
+
+		results = internal.execute('log', pretty="format:'%s'" % self.__log_format)
 		os.chdir(cwd)
+		return results
 
-		rc = []
-		graph_data = {}
-		for r in results:
-			d = r.split('||')
-			name = d[0]
-			if not graph_data.get(name):
-				graph_data[name] = 0
-			graph_data[name] += 1
-			rc.append(d)
+	def load(self):
+		self.results = self._load_full()
+		self.results = map(lambda r: json_decode(r), self.results)
+		print self.results
 
-		if cls.should_graph:
-			CairoPlot.donut_plot('committers_%s' % (time.time()), graph_data, 600, 400, gradient=True, inner_radius=0.2, shadow=True)
-		return rc
 		

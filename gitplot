@@ -1,13 +1,22 @@
 #!/usr/bin/env python
 
+from optparse import OptionParser
+
 from contrib import CairoPlot
 from internal import log
 
 
 def main():
 	print "===> Starting Git Plot"
-	print log.GitLog.committers()
+	_op = OptionParser()
+	_op.add_option('-d', '--directory', dest='directory', help='Directory of the Git repository to analyze')
+
+	options, args = _op.parse_args()
 	
+	glog = log.GitLog()
+	if options.directory:
+		glog.directory = options.directory
+	glog.load()
 
 
 if __name__ == '__main__':
