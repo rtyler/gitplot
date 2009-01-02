@@ -32,6 +32,7 @@ import random
 
 HORZ = 0
 VERT = 1
+FONT_SIZE = 11
 
 def other_direction(direction):
     "explicit is better than implicit"
@@ -61,7 +62,7 @@ class Plot(object):
         self.labels[HORZ] = h_labels
         self.labels[VERT] = v_labels
 
-        self.font_size = 10
+        self.font_size = FONT_SIZE
         
         self.set_background (background)
         self.border = border

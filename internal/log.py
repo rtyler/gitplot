@@ -91,7 +91,7 @@ class GitLog(object):
 			data = [c[1] for c in t]
 			labels = [c[0] for c in t]
 			vlabels = ['0', str(data[0])]
-			CairoPlot.bar_plot(filename, data, width, height, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+			CairoPlot.bar_plot(filename, data, width, height, border=10, grid=True, h_labels=labels, v_labels=vlabels) 
 		def _gen_Donut(t):
 			data = dict([(t[i][0], t[i][1]) for i in xrange(len(t))])
 			CairoPlot.donut_plot(filename, data, width, height, gradient=True, shadow=True)
@@ -130,7 +130,7 @@ class GitLog(object):
 				bars.append(v)
 				labels.append(k)
 			vlabels = ['0', str(upper)]
-			CairoPlot.bar_plot(filename, bars, width, height, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+			CairoPlot.bar_plot(filename, bars, width, height, border=10, grid=True, h_labels=labels, v_labels=vlabels) 
 
 		try:
 			return locals()['_gen_%s' % chart](results)
