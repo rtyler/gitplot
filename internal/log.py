@@ -39,8 +39,13 @@ class GitLog(object):
 		cwd = os.getcwd()
 		if not self.directory == self.default_directory:
 			os.chdir(self.directory)
-
-		results = internal.execute('log', pretty='format:\'%s\'' % self.__log_format)
+		
+		kwargs = {'pretty' : 'format:\'%s\'' % self.__log_format}
+		if self.before:
+			kwargs.update({'before' : '"%s"' % self.before})
+		if self.after:
+			kwargs.update({'after' : '"%s"' % self.after})
+		results = internal.execute('log', **kwargs)
 		os.chdir(cwd)
 		results = [r.replace('\\', '\\\\').replace('\"', '\\\"').replace('\'', '\\\'').replace(internal.DQUOTE, '\"') for r in results]
 		return results
@@ -69,6 +74,9 @@ class GitLog(object):
 
 		if self.dryrun:
 			print top
+			return
+		if not top:
+			print '===> No data to graph!'
 			return
 
 		filename = filename or 'top_%d_committers_%s' % (count, time.time())
