@@ -46,6 +46,8 @@ class GitLog(object):
 			kwargs.update({'before' : '"%s"' % self.before})
 		if self.after:
 			kwargs.update({'after' : '"%s"' % self.after})
+		if self.author:
+			kwargs.update({'author' : self.author})
 		results = internal.execute('log', **kwargs)
 		os.chdir(cwd)
 		results = [r.replace('\\', '\\\\').replace('\"', '\\\"').replace('\'', '\\\'').replace(internal.DQUOTE, '\"') for r in results]
