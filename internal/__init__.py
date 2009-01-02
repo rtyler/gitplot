@@ -11,4 +11,9 @@ def execute(cmd, *args, **kwargs):
 	rc = os.popen('git %s %s %s' % (cmd, ' '.join(args), ' '.join(kwargs)))
 	rc = rc.read().rstrip()
 	return rc.split(EOL)
+
+class ChartType(object):
+	Bar = 'Bar'
+	Pie = 'Pie'
+	Donut = 'Donut'
 	
