@@ -11,6 +11,8 @@ def main():
 	_op.add_option('-d', '--directory', dest='directory', help='Directory of the Git repository to analyze')
 	_op.add_option('--dry-run', action='store_true', dest='dryrun', help='Don\'t actually generate graphs, just print data')
 	_op.add_option('-c', '--chart', default='bar', dest='chart', help='Type of chart you\'d like (where applicable), (pie, donut, bar)')
+	_op.add_option('-t', '--type', dest='type', help='Which kind of graph should be generated? [top_committers]')
+	_op.add_option('--kwargs', dest='kwargs', help='Supplemental arguments to pass into the graph generators')
 
 	options, args = _op.parse_args()
 	
