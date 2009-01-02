@@ -17,6 +17,7 @@ def main():
 	_op.add_option('--author', default=None, dest='author', help='Specify the author to generate the statistics for')
 	_op.add_option('-y', '--height', default=450, dest='height', help='Height of generated images')
 	_op.add_option('-x', '--width', default=800, dest='width', help='Width of generated images')
+	_op.add_option('-f', '--prefix', default=None, dest='filename', help='Prefix for generated image files')
 
 	options, args = _op.parse_args()
 
@@ -30,7 +31,8 @@ def main():
 	if options.chart == 'donut':
 		chart = internal.ChartType.Donut
 
-	kwargs = {'before' : options.before, 'after' : options.after, 'dryrun' : options.dryrun, 'author' : options.author}
+	kwargs = {'before' : options.before, 'after' : options.after, 'dryrun' : options.dryrun, 'filename' : options.filename,
+					'author' : options.author}
 	glog = internal.log.GitLog(**kwargs)
 	if options.directory:
 		glog.directory = options.directory

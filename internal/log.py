@@ -88,7 +88,7 @@ class GitLog(object):
 			print '===> No data to graph!'
 			return
 
-		filename = filename or 'top_%d_committers_%s.png' % (count, time.time())
+		filename = '%s_leaderboard.png' % (self.filename or time.time())
 		def _gen_Bar(t):
 			data = [c[1] for c in t]
 			labels = [c[0] for c in t]
@@ -112,7 +112,7 @@ class GitLog(object):
 			self.load()
 		results = copy.deepcopy(self.results)
 		results.sort(key=lambda d: d['committer_timeofday'])
-		filename = filename or 'timesofday_%s.png' % (time.time())
+		filename = '%s_timeofday.png' % (self.filename or time.time())
 
 		def _gen_Bar(r):
 			data = {}
