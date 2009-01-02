@@ -82,8 +82,7 @@ class GitLog(object):
 			CairoPlot.donut_plot(filename, data, 600, 400, gradient=True, shadow=True)
 		def _gen_Pie(t):
 			data = dict([(t[i][0], t[i][1]) for i in xrange(len(t))])
-			CairoPlot.pie_plot(filename, data, 600, 400, gradient=True, shadow=True)
-
+			CairoPlot.pie_plot(filename, data, 600, 400, gradient=True)
 
 		try:
 			return locals()['_gen_%s' % chart](top)
