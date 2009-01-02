@@ -52,5 +52,7 @@ class GitLog(object):
 				counter[r['committer_name']] = 0
 			counter[r['committer_name']] += 1
 
-		print counter
+		counter = [(k, v) for k,v in counter.iteritems()]
+		counter.sort(key=lambda i: i[1], reverse=True)
+		top = counter[:count]
 
