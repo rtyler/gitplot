@@ -55,7 +55,7 @@ class GitLog(object):
 		self.results = self._load_full()
 		self.results = map(lambda r: r and json_decode(r), self.results)
 		def timeofday(f):
-			return time.strftime('%H:%M', time.gmtime(f['committer_date']))
+			return time.strftime('%H:%M', time.localtime(f['committer_date']))
 		def handle(f):
 			return f['committer_email'].split('@')[0]
 		self.results = [f for f in self.results if f and \
@@ -128,7 +128,7 @@ class GitLog(object):
 				bars.append(v)
 				labels.append(k)
 			vlabels = ['0', str(height)]
-			CairoPlot.bar_plot(filename, bars, 600, 200, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+			CairoPlot.bar_plot(filename, bars, 700, 400, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
 
 		try:
 			return locals()['_gen_%s' % chart](results)
