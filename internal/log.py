@@ -14,6 +14,7 @@ def json_decode(s):
 			return cjson.decode(s)
 		except cjson.DecodeError:
 			print s
+			raise
 	except ImportError:
 		import simplejson
 		return simplejson.loads(s)
@@ -23,7 +24,8 @@ class GitLog(object):
 	results = []
 	default_directory = directory
 	should_graph = True
-	__log_format = '''{%x22committer_name%x22 : %x22%cn%x22, %x22committer_email%x22 : %x22%ce%x22, %x22hash%x22 : %x22%H%x22,	%x22abbrev_hash%x22 : %x22%h%x22, %x22committer_date%x22 : %x22%ct%x22, %x22encoding%x22 : %x22%e%x22, %x22subject%x22 : %x22%s%x22, %x22body%x22 : %x22%b%x22, %x22tree_hash%x22 : %x22%T%x22, %x22author_name%x22 : %x22%an%x22, %x22author_email%x22 : %x22%ae%x22, %x22author_date%x22 : %x22%at%x22}GITPLOTEOL'''
+	# OH GOD IT BURNS
+	__log_format = '''{%(q)scommitter_name%(q)s : %(q)s%%cn%(q)s, %(q)scommitter_email%(q)s : %(q)s%%ce%(q)s, %(q)shash%(q)s : %(q)s%%H%(q)s,	%(q)sabbrev_hash%(q)s : %(q)s%%h%(q)s, %(q)scommitter_date%(q)s : %(q)s%%ct%(q)s, %(q)sencoding%(q)s : %(q)s%%e%(q)s, %(q)ssubject%(q)s : %(q)s%%s%(q)s, %(q)sbody%(q)s : %(q)s%%b%(q)s, %(q)stree_hash%(q)s : %(q)s%%T%(q)s, %(q)sauthor_name%(q)s : %(q)s%%an%(q)s, %(q)sauthor_email%(q)s : %(q)s%%ae%(q)s, %(q)sauthor_date%(q)s : %(q)s%%at%(q)s}%(eol)s''' % {'q' : internal.DQUOTE, 'eol' : internal.EOL}
 
 	def _get_log_fmt(self):
 		return self.__log_format
@@ -36,11 +38,14 @@ class GitLog(object):
 
 		results = internal.execute('log', pretty='format:\'%s\'' % self.__log_format)
 		os.chdir(cwd)
+		results = [r.replace('\\', '\\\\').replace('\"', '\\\"').replace('\'', '\\\'') for r in results]
+		results = [r.replace(internal.DQUOTE, '\"') for r in results]
 		return results
 
 	def load(self):
-		self.results = [f for f in self._load_full() if f]
-		self.results = map(lambda r: json_decode(r), self.results)
+		self.results = self._load_full()
+		self.results = map(lambda r: r and json_decode(r), self.results)
+		self.results = [f for f in self.results if f]
 		self.results.sort(key=lambda d: d['committer_date'])
 	
 	def top_committers(self, count=10, filename=None):
@@ -57,7 +62,8 @@ class GitLog(object):
 		top = counter[:count]
 
 		filename = filename or 'top_%d_committers_%s' % (count, time.time())
-		data = [c[0] for c in top]
-		labels = [c[1] for c in top]
-		CairoPlot.bar_plot(filename, data, 600, 200, border=10, grid=True, three_dimension=True, h_labels=labels) 
+		data = [c[1] for c in top]
+		labels = [c[0] for c in top]
+		vlabels = ['0', str(data[0])]
+		CairoPlot.bar_plot(filename, data, 600, 200, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
 
