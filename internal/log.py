@@ -56,3 +56,8 @@ class GitLog(object):
 		counter.sort(key=lambda i: i[1], reverse=True)
 		top = counter[:count]
 
+		filename = filename or 'top_%d_committers_%s' % (count, time.time())
+		data = [c[0] for c in top]
+		labels = [c[1] for c in top]
+		CairoPlot.bar_plot(filename, data, 600, 200, border=10, grid=True, three_dimension=True, h_labels=labels) 
+
