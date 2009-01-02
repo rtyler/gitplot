@@ -14,6 +14,8 @@ def main():
 	_op.add_option('-c', '--chart', default='bar', dest='chart', help='Type of chart you\'d like (where applicable), (pie, donut, bar)')
 	_op.add_option('--before', default=None, dest='before', help='Specify a "before" time frame')
 	_op.add_option('--after', default=None, dest='after', help='Speficy an "after" time frame')
+	_op.add_option('-y', '--height', default=450, dest='height', help='Height of generated images')
+	_op.add_option('-x', '--width', default=800, dest='width', help='Width of generated images')
 
 	options, args = _op.parse_args()
 
@@ -33,7 +35,7 @@ def main():
 		glog.directory = options.directory
 	glog.load()
 
-	map(lambda x: getattr(glog, x)(chart=chart), args)
+	map(lambda x: getattr(glog, x)(chart=chart, height=int(options.height), width=int(options.width)), args)
 
 if __name__ == '__main__':
 	main()

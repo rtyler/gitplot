@@ -62,7 +62,8 @@ class GitLog(object):
 			not f.update({'committer_handle' : handle(f), 'committer_timeofday' : timeofday(f)})]
 		self.results.sort(key=lambda d: d['author_date'])
 	
-	def leaderboard(self, count=10, filename=None, by_email=True, chart=internal.ChartType.Bar):
+	def leaderboard(self, width=None, height=None, count=10, filename=None, by_email=True, chart=internal.ChartType.Bar):
+		assert width or height
 		if not self.results:
 			self.load()
 		counter = {}
@@ -90,20 +91,21 @@ class GitLog(object):
 			data = [c[1] for c in t]
 			labels = [c[0] for c in t]
 			vlabels = ['0', str(data[0])]
-			CairoPlot.bar_plot(filename, data, 700, 400, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+			CairoPlot.bar_plot(filename, data, width, height, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
 		def _gen_Donut(t):
 			data = dict([(t[i][0], t[i][1]) for i in xrange(len(t))])
-			CairoPlot.donut_plot(filename, data, 700, 400, gradient=True, shadow=True)
+			CairoPlot.donut_plot(filename, data, width, height, gradient=True, shadow=True)
 		def _gen_Pie(t):
 			data = dict([(t[i][0], t[i][1]) for i in xrange(len(t))])
-			CairoPlot.pie_plot(filename, data, 700, 400, gradient=True)
+			CairoPlot.pie_plot(filename, data, width, height, gradient=True)
 
 		try:
 			return locals()['_gen_%s' % chart](top)
 		except KeyError:
 			print 'This function does not support chart type: %s' % chart
 
-	def timeofday(self, filename=None, by_email=True, chart=internal.ChartType.Bar):
+	def timeofday(self, width=None, height=None, filename=None, by_email=True, chart=internal.ChartType.Bar):
+		assert width or height
 		if not self.results:
 			self.load()
 		results = copy.deepcopy(self.results)
@@ -121,14 +123,14 @@ class GitLog(object):
 				data[hour] += 1
 			data = [(k,v) for k,v in data.iteritems()]
 			data.sort(key=lambda d: d[0])
-			height = 0
+			upper = 0
 			for k,v in data:
-				if v > height:
-					height = v
+				if v > upper:
+					upper = v
 				bars.append(v)
 				labels.append(k)
-			vlabels = ['0', str(height)]
-			CairoPlot.bar_plot(filename, bars, 700, 400, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
+			vlabels = ['0', str(upper)]
+			CairoPlot.bar_plot(filename, bars, width, height, border=10, grid=True, three_dimension=True, h_labels=labels, v_labels=vlabels) 
 
 		try:
 			return locals()['_gen_%s' % chart](results)
