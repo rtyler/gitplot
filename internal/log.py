@@ -1,6 +1,7 @@
 import copy
 import itertools
 import os
+import pdb
 import sys
 import time
 
@@ -26,7 +27,7 @@ class GitLog(object):
 	default_directory = directory
 	should_graph = True
 	# OH GOD IT BURNS
-	__log_format = '''{%(q)scommitter_name%(q)s : %(q)s%%cn%(q)s, %(q)scommitter_email%(q)s : %(q)s%%ce%(q)s, %(q)shash%(q)s : %(q)s%%H%(q)s,	%(q)sabbrev_hash%(q)s : %(q)s%%h%(q)s, %(q)scommitter_date%(q)s : %%ct, %(q)sencoding%(q)s : %(q)s%%e%(q)s, %(q)ssubject%(q)s : %(q)s%%s%(q)s, %(q)sbody%(q)s : %(q)s%%b%(q)s, %(q)stree_hash%(q)s : %(q)s%%T%(q)s, %(q)sauthor_name%(q)s : %(q)s%%an%(q)s, %(q)sauthor_email%(q)s : %(q)s%%ae%(q)s, %(q)sauthor_date%(q)s : %%at}%(eol)s''' % {'q' : internal.DQUOTE, 'eol' : internal.EOL}
+	__log_format = '''%(bol)s{%(q)scommitter_name%(q)s : %(q)s%%cn%(q)s, %(q)scommitter_email%(q)s : %(q)s%%ce%(q)s, %(q)shash%(q)s : %(q)s%%H%(q)s,	%(q)sabbrev_hash%(q)s : %(q)s%%h%(q)s, %(q)scommitter_date%(q)s : %%ct, %(q)sencoding%(q)s : %(q)s%%e%(q)s, %(q)ssubject%(q)s : %(q)s%%s%(q)s, %(q)sbody%(q)s : %(q)s%%b%(q)s, %(q)stree_hash%(q)s : %(q)s%%T%(q)s, %(q)sauthor_name%(q)s : %(q)s%%an%(q)s, %(q)sauthor_email%(q)s : %(q)s%%ae%(q)s, %(q)sauthor_date%(q)s : %%at}%(eol)s''' % {'q' : internal.DQUOTE, 'eol' : internal.EOL, 'bol' : internal.BOL}
 
 
 	def __init__(self, *args, **kwargs):
@@ -41,7 +42,7 @@ class GitLog(object):
 		if not self.directory == self.default_directory:
 			os.chdir(self.directory)
 		
-		kwargs = {'pretty' : 'format:\'%s\'' % self.__log_format, 'numstat' : None}
+		kwargs = {'pretty' : 'format:\'%s\'' % self.__log_format, 'numstat' : None, 'split' : internal.BOL}
 		if self.before:
 			kwargs.update({'before' : '"%s"' % self.before})
 		if self.after:
@@ -50,12 +51,34 @@ class GitLog(object):
 			kwargs.update({'author' : self.author})
 		results = internal.execute('log', **kwargs)
 		os.chdir(cwd)
-		results = [r.replace('\\', '\\\\').replace('\"', '\\\"').replace('\'', '\\\'').replace(internal.DQUOTE, '\"') for r in results]
+		results = [r.split(internal.EOL) for r in results]
+		results = [(r[0].replace('\\', '\\\\').replace('\"', '\\\"').replace('\'', '\\\'').replace(internal.DQUOTE, '\"'), \
+				len(r) == 2  and r[1] or '') for r in results]
 		return results
 
 	def load(self):
 		self.results = self._load_full()
-		self.results = map(lambda r: r and json_decode(r), self.results)
+		# Elements in the self.results list should alternate between one line of JSON, and one line of numstats
+		rc = []
+		for r in self.results:
+			if not r[0]:
+				continue
+			t = json_decode(r[0])
+			if len(r) == 2:
+				# OW OW OW OW 
+				numstat = [n.split('\t') for n in r[1].strip().split('\n')]
+				def _numstat_gen(line):
+					d = {'added' : 0, 'removed' : 0, 'filename' : line[2], 'newfile' : False}
+					if line[0] == '-' and line[1] == '-':
+						d['newfile'] = True
+					else:
+						d['added'], d['removed'] = line[0],line[1]
+					return d
+				t['numstat'] = map(lambda n: len(n) == 3 and _numstat_gen(n), numstat)
+			else:
+				t['numstat'] = None
+			rc.append(t)
+		self.results = rc
 		def timeofday(f):
 			return time.strftime('%H:%M', time.localtime(f['committer_date']))
 		def handle(f):
