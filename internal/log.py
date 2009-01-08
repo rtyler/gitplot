@@ -41,7 +41,7 @@ class GitLog(object):
 		if not self.directory == self.default_directory:
 			os.chdir(self.directory)
 		
-		kwargs = {'pretty' : 'format:\'%s\'' % self.__log_format}
+		kwargs = {'pretty' : 'format:\'%s\'' % self.__log_format, 'numstat' : None}
 		if self.before:
 			kwargs.update({'before' : '"%s"' % self.before})
 		if self.after:
