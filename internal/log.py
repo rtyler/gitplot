@@ -68,15 +68,16 @@ class GitLog(object):
 				# OW OW OW OW 
 				numstat = [n.split('\t') for n in r[1].strip().split('\n')]
 				def _numstat_gen(line):
-					d = {'added' : 0, 'removed' : 0, 'filename' : line[2], 'newfile' : False}
+					d = {'added' : 0, 'removed' : 0, 'filename' : line[2], 'binary' : False}
 					if line[0] == '-' and line[1] == '-':
-						d['newfile'] = True
+						d['binary'] = True
 					else:
-						d['added'], d['removed'] = line[0],line[1]
+						d['added'], d['removed'] = int(line[0]),int(line[1])
 					return d
 				t['numstat'] = map(lambda n: len(n) == 3 and _numstat_gen(n), numstat)
+				t['numstat'] = [nm for nm in t['numstat'] if nm]
 			else:
-				t['numstat'] = None
+				t['numstat'] = []
 			rc.append(t)
 		self.results = rc
 		def timeofday(f):
@@ -161,4 +162,40 @@ class GitLog(object):
 			return locals()['_gen_%s' % chart](results)
 		except KeyError:
 			print 'This function does not support chart type: %s' % chart
+
+	def churn(self, width=None, height=None, filename=None, chart=internal.ChartType.Bar):
+		assert width or height
+		if not self.results:
+			self.load()
+		results = copy.deepcopy(self.results)
+		results.reverse()
+		filename = '%s_churn.png' % (self.filename or time.time())
+
+		rc = {}
+		for commit in results:
+			if not commit['numstat']:
+				continue
+			churn = []
+			for file in commit['numstat']:
+				if file['binary']:
+					continue
+				churn.append( (file['added'], file['removed'], file['filename']) )
+
+			author = commit['committer_handle']
+			if not rc.get(author):
+				rc[author] = {'commits' : 0, 'files' : [], 'added' : 0, 'removed' : 0}
+
+			rc[author]['commits'] += 1
+			rc[author]['files'].extend([f[2] for f in churn])
+			added = map(lambda c: c[0], churn)
+			removed = map(lambda c: c[1], churn)
+			rc[author]['added'] += added and reduce(lambda x,y: x+y, added) or 0
+			rc[author]['removed'] += removed and reduce(lambda x,y: x+y, removed) or 0
+		
+		for k in rc.keys():
+			rc[k]['files'] = list(set(rc[k]['files']))
+			rc[k]['distinct_files'] = len(rc[k]['files'])
+		
+		for k,r in rc.iteritems():
+			print '%s touched %d files, +%s, -%s lines (total: %s, net: %s)' % (k, r['distinct_files'], r['added'], r['removed'], r['added']+r['removed'], r['added']-r['removed'])
 

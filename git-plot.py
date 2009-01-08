@@ -6,7 +6,7 @@ import internal
 import internal.log
 
 def main():
-	sub_commands = ['leaderboard', 'timeofday']
+	sub_commands = ['leaderboard', 'timeofday', 'churn']
 	usage = 'usage: %%prog [options] <%s>' % '|'.join(sub_commands)
 	_op = OptionParser(usage=usage)
 	_op.add_option('-d', '--directory', default='.', dest='directory', help='Directory of the Git repository to analyze')
