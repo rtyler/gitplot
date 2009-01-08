@@ -192,10 +192,28 @@ class GitLog(object):
 			rc[author]['added'] += added and reduce(lambda x,y: x+y, added) or 0
 			rc[author]['removed'] += removed and reduce(lambda x,y: x+y, removed) or 0
 		
-		for k in rc.keys():
-			rc[k]['files'] = list(set(rc[k]['files']))
-			rc[k]['distinct_files'] = len(rc[k]['files'])
-		
+		d = []
 		for k,r in rc.iteritems():
-			print '%s touched %d files, +%s, -%s lines (total: %s, net: %s)' % (k, r['distinct_files'], r['added'], r['removed'], r['added']+r['removed'], r['added']-r['removed'])
+			d.append( (k, r['commits'], r['files'], abs(r['added']-r['removed']) / r['commits'] ) )
+			#print '%s touched %d files, +%s, -%s lines (total: %s, net: %s)' % (k, r['distinct_files'], r['added'], r['removed'], r['added']+r['removed'], r['added']-r['removed'])
+			#print '\t Average net-change per commit: %.2f lines' % ( abs(r['added']-r['removed']) / r['commits'] )
+
+		def _gen_Bar(data):
+			vlabels = ['0']
+			def _average_files(gdata):
+				return len(gdata[2]) / gdata[1]
+			data.sort(key=lambda d: d[1], reverse=True)
+			data = data[:10]
+			bars = [[k[3], _average_files(k)] for k in data]
+			labels = [k[0] for k in data]
+			vlabels.extend([str(d[0]) for d in bars])
+			vlabels = [f for f in vlabels if int(f)]
+			vlabels.sort(key=lambda t: int(t))
+			vlabels = ['0', vlabels[-1]]
+			CairoPlot.bar_plot(filename, bars, width, height, border=10, grid=True, h_labels=labels, v_labels=vlabels) 
+
+		try:
+			return locals()['_gen_%s' % chart](d)
+		except KeyError:
+			print 'This function does not support chart type: %s' % chart
 
